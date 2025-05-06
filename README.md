@@ -1,4 +1,4 @@
-# transaction-service
+# Transaction-service
 
 Spring Boot service for ingesting and aggregating transaction data with JWT security, PostgreSQL, and Prometheus monitoring.
 
