@@ -1,0 +1,64 @@
+stages:
+  - test
+  - build
+  - deploy  # optional stage if you add deployment later
+
+variables:
+  MAVEN_CLI_OPTS: "-B -DskipTests"  # Use batch mode for Maven and skip tests during build
+  DOCKER_DRIVER: overlay2           # Recommended Docker storage driver
+  TESTCONTAINERS_RYUK_DISABLED: "true"  # Avoid Ryuk errors in CI environments
+
+# ==============================
+# 1. TEST STAGE (Runs Unit + Integration Tests)
+# ==============================
+test:
+  stage: test
+  image: maven:3.9.4-eclipse-temurin-21  # Maven image with Java 21
+  services:
+    - name: docker:dind  # Docker-in-Docker to support Testcontainers
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375  # Point to the DinD daemon
+    DOCKER_TLS_CERTDIR: ""          # Disable TLS for local DinD
+  before_script:
+    - apt-get update && apt-get install -y curl
+    - echo "Using Java version:" && java -version
+    - echo "Docker version:" && docker version
+  script:
+    - mvn clean verify  # Run full test suite (unit + integration)
+  only:
+    - merge_requests  # Run tests on merge requests
+    - main            # Also run tests on pushes to main
+
+# ==============================
+# 2. BUILD STAGE (Builds Docker Image)
+# ==============================
+build:
+  stage: build
+  image: docker:24.0.5  # Lightweight Docker image for building containers
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker info  # Helpful for diagnosing DinD issues if any
+  script:
+    - docker build -t transaction-service-app:latest .  # Build the Docker image from your Dockerfile
+  only:
+    - main  # Build image only when pushing to main branch
+
+# ==============================
+# 3. DEPLOY STAGE (Applies Terraform Configurations)
+# ==============================
+deploy:
+  stage: deploy
+  image: hashicorp/terraform:1.6.6  # Use official Terraform image for IaC automation
+  script:
+    - cd infrastructure  # Navigate to the directory containing Terraform configs
+    - terraform init     # Initialize the Terraform working directory
+    - terraform validate # Ensure the configuration is syntactically valid
+    - terraform plan     # Show what actions Terraform will take
+    - terraform apply -auto-approve  # Apply changes without interactive approval
+  only:
+    - main  # Trigger deploy stage only on commits to main branch

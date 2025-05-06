@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: transaction_service
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/transaction_service_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      APP_JWT_SECRET: Zxj87Dq9qK3YbqLTxQy6ZpE9T8vW5x0EJjUoKlaPt6gMuvKbSrfX3dTqC4JHV+yq6xwJ8qFtN0e=
+      APP_JWT_EXPIRATION_MS: 86400000
+      APP_JWT_ISSUER: transaction-service
+      APP_JWT_AUDIENCE: transaction-client
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: transaction_service_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
