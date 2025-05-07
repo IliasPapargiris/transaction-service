@@ -83,8 +83,8 @@ POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@okto.com",
-  "password": "AdminPassword123"
+  "email": "admin@admin.com",
+  "password": "admin123"
 }
 ```
 
@@ -152,7 +152,7 @@ The migrations also pre-populate essential data including supported countries, c
 
 ## ☁️ (Optional) Deploy to AWS ECS with Terraform
 
-Terraform template is included under `infra/terraform`.
+Terraform template is included under `infra/terraform` (dummie file).
 
 ### Steps:
 
@@ -199,8 +199,8 @@ This service is built with a strong emphasis on **data integrity**, **global sta
 ### 🌍 ISO-Based Country & Currency Modeling
 
 Countries and currencies are stored using standardized identifiers:
-- **Country codes** follow [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2), e.g., `GR`, `US`
-- **Currency codes** follow [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217), e.g., `USD`, `EUR`
+- **Country codes** follow ISO 3166-1 alpha-2, e.g., `GR`, `US`
+- **Currency codes** follow ISO 4217 e.g., `USD`, `EUR`
 
 Using these standards:
 - Promotes interoperability with external systems
@@ -213,7 +213,6 @@ The `country_supported_currencies` table models a many-to-many relationship, ena
 - Countries that support multiple currencies
 - Shared currencies across countries
 
-Uniqueness constraints and foreign key relationships ensure referential integrity and consistency in mappings.
 
 ### ✅ Input Validation
 
@@ -231,8 +230,8 @@ This two-layer approach — DTO validation and DB constraints — ensures that o
 For convenience and testing purposes, the following admin user is inserted via Flyway on startup:
 
 ```
-email:    admin@okto.com
-password: AdminPassword123
+email:    admin@admin.com
+password: admin123
 ```
 
 You can use these credentials to authenticate via the Swagger UI login endpoint and access all protected resources with `ROLE_ADMIN`.
